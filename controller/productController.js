@@ -1,4 +1,5 @@
 const Product = require("../model/Product");
+const Rating = require("../model/Rating");
 
 exports.createProduct = async (req, res, next) => {
   try {
@@ -34,9 +35,28 @@ exports.getAllProducts = async (req, res, next) => {
 
 exports.getProductById = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    res.json(product);
+    const productId = req.params.id;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const ratings = await Rating.find({ productId });
+
+    let averageRating = 0;
+    if (ratings.length > 0) {
+      const sum = ratings.reduce((total, rating) => total + rating.rating, 0);
+      averageRating = sum / ratings.length;
+    }
+    const response = {
+      ...product.toObject(),
+      averageRating: parseFloat(averageRating.toFixed(1)),
+      totalRatings: ratings.length,
+      outOf5: 5,
+    };
+
+    res.json(response);
   } catch (error) {
     next(error);
   }

@@ -61,7 +61,7 @@ exports.viewCart = async (req, res, next) => {
       "items.productId",
       "name price imageUrl"
     );
-    if (!cart) return res.status(200).json({ items: [] }); // return empty if no cart
+    if (!cart) return res.status(200).json({ items: [] });
 
     res.status(200).json(cart);
   } catch (err) {

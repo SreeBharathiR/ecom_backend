@@ -1,43 +1,49 @@
 const Rating = require("../model/Rating");
 const Product = require("../model/Product");
+const Order = require("../model/Order");
 
 exports.addRating = async (req, res, next) => {
   try {
     const { productId, rating, review } = req.body;
     const userId = req.user.id;
-
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
+    const order = await Order.findOne({
+      userId,
+      "items.productId": productId,
+    });
 
+    if (!order) {
+      return res
+        .status(403)
+        .json({ message: "You must purchase the product before rating." });
+    }
+    const item = order.items.find(
+      (item) => item.productId.toString() === productId && !item.rated
+    );
+
+    if (!item) {
+      return res
+        .status(400)
+        .json({ message: "Product already rated or not found in order." });
+    }
     let existingRating = await Rating.findOne({ productId, userId });
-
+    let newRating;
     if (existingRating) {
       existingRating.rating = rating;
       existingRating.review = review;
       await existingRating.save();
-      return res
-        .status(200)
-        .json({ message: "Rating updated", rating: existingRating });
+    } else {
+      newRating = new Rating({ productId, userId, rating, review });
+      await newRating.save();
     }
+    item.rated = true;
+    await order.save();
 
-    const newRating = new Rating({ productId, userId, rating, review });
-    await newRating.save();
-
-    res.status(201).json({ message: "Rating added", rating: newRating });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.getProductRatings = async (req, res, next) => {
-  try {
-    const { productId } = req.params;
-
-    const ratings = await Rating.find({ productId })
-      .populate("userId", "name")
-      .sort({ createdAt: -1 });
-
-    res.status(200).json(ratings);
+    return res.status(200).json({
+      message: existingRating ? "Rating updated" : "Rating added",
+      rating: existingRating || newRating,
+    });
   } catch (err) {
     next(err);
   }

@@ -28,7 +28,7 @@ router.get("/me", auth, (req, res) => {
     return res.status(401).json({ message: "Not authenticated" });
   }
   res.status(200).json({
-    id: req.user._id,
+    id: req.user.id,
     email: req.user.email,
     name: req.user.name,
     role: req.user.role,

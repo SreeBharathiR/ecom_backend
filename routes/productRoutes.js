@@ -23,7 +23,4 @@ router.put(
 // 5. Delete product
 router.delete("/:id", auth, productController.deleteProduct);
 
-// 6. Bulk upload products
-router.post("/bulk-upload", auth, productController.bulkUploadProducts);
-
 module.exports = router;

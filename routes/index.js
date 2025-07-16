@@ -10,12 +10,11 @@ const ratingRoutes = require("./ratingRoutes");
 const authRoutes = require("./authRoutes");
 const { auth } = require("../middlewares/auth");
 
-// Use the routes with appropriate base paths
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/carts", auth, cartRoutes);
 router.use("/products", productRoutes);
 router.use("/orders", auth, orderRoutes);
-router.use("/ratings", ratingRoutes);
+router.use("/ratings", auth, ratingRoutes);
 
 module.exports = router;
