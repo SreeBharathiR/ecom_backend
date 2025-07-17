@@ -7,6 +7,7 @@ const router = require("./routes");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
+const path = require("path");
 const errorHandler = require("./middlewares/errorHandler");
 require("./config/passportConfig");
 const app = express();
@@ -39,7 +40,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use("/api", router);
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(errorHandler);
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
